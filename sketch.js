@@ -1,3 +1,6 @@
+// Program to Guess Digits
+
+// initializing variables for the rest of the program
 let c; 
 let b; 
 let i = 0; 
@@ -30,6 +33,7 @@ let filter = [
     [-1, -1, -1]
 ];
 
+// load in training data
 function preload(){
     for (let i=0; i<images; i++) {
         num.push(loadImage('images/myCanvas0 (' + i + ').jpg'));
@@ -98,6 +102,7 @@ function preload(){
     target = loadImage('images/myFavoriteNumber.jpg');
 }
 
+// program body
 function setup(){
 
     /*
@@ -122,6 +127,33 @@ function setup(){
     console.log("Your number was supposed to be 5. Your result was: " + test());
 } 
 
+// drawing image in websocket interation
+function draw(){
+    fill(255); 
+    stroke(255); 
+    strokeWeight(8); 
+    if(mouseIsPressed){
+        point(mouseX, mouseY); 
+    }
+    b.mousePressed(saveImage);
+    ready = true;
+}
+
+// saving images in downloads
+ function saveImage(){
+    saveCanvas(c, `myCanvas${i}`, 'jpg');
+    moveImage(i); 
+    i++; 
+} 
+
+// moving image locations
+ function moveImage(ind){
+    let fs=Server.CreateObject("Scripting.FileSystemObject")
+    var file = fs.GetFile(`~/Downloads/myCanvas${i}.jpg`);
+    file.Move("~/Downloads/calcbcproj/images/");
+} 
+
+// processing each training image
 function process(numInd) {
 
     for (let i=0; i<10; i++) {
@@ -181,6 +213,7 @@ function process(numInd) {
     console.log(inputx);
 }
 
+// processing target image
 function processTest() {
 
     target.loadPixels();
@@ -234,37 +267,17 @@ function processTest() {
     console.log(inputx);
 }
 
- function draw(){
-    fill(255); 
-    stroke(255); 
-    strokeWeight(8); 
-    if(mouseIsPressed){
-        point(mouseX, mouseY); 
-    }
-    b.mousePressed(saveImage);
-    ready = true;
-}
-
- function saveImage(){
-    saveCanvas(c, `myCanvas${i}`, 'jpg');
-    moveImage(i); 
-    i++; 
-} 
-
- function moveImage(ind){
-    let fs=Server.CreateObject("Scripting.FileSystemObject")
-    var file = fs.GetFile(`~/Downloads/myCanvas${i}.jpg`);
-    file.Move("~/Downloads/calcbcproj/images/");
-} 
-
+// indexing pixels from image
 function index(x, y) {
     return (x + y * num.width) * 4;
 }
 
+// indexing data
 function indexData(x, y, w) {
     return (x + (y * w));
 }
-  
+
+// creating convolutional image based on given filter
 function convolution(img, x, y, filter) {
     let sumR = 0;
     let sumG = 0;
@@ -286,6 +299,7 @@ function convolution(img, x, y, filter) {
     };
 }
 
+// creating convolutional image based on given filter
 function convolutionData(data, x, y, filter) {
     let sum = 0;
     for (let i = -1; i <= 1; i++) {
@@ -299,6 +313,7 @@ function convolutionData(data, x, y, filter) {
     return sum;
 }
 
+// creating pooled image based on given filter
 function pooling(img, x, y) {
     let brightR = -Infinity;
     let brightG = -Infinity;
@@ -321,6 +336,7 @@ function pooling(img, x, y) {
     };
 }
 
+// creating pooled image based on given filter
 function poolingData(data, x, y) {
     let bright = -Infinity;
     for (let i = 0; i < stride; i++) {
@@ -333,6 +349,7 @@ function poolingData(data, x, y) {
     return bright;
 }
 
+// test model on image dataset and alter weights to improve model
 function cycle() {
     error = 0;
     for (let i=0; i<images; i++) {
@@ -344,6 +361,7 @@ function cycle() {
     backpropagate();
 }
 
+// assess error of current model
 function evaluation(numInd) {
     for (let i=0; i<10; i++) {
         clas[numInd].push(0);
@@ -371,6 +389,7 @@ function evaluation(numInd) {
     // console.log("error: " + error);
 }
 
+// alter weights based on results
 function backpropagate() {
     for (let i=0; i<10; i++) {
         for (let j=0; j<pooledData[0].length; j++) {
@@ -387,6 +406,7 @@ function backpropagate() {
     }
 }
 
+// use trained model to guess which target it is
 function test() {
     processTest();
 
